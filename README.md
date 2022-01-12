@@ -1,7 +1,7 @@
-gstop - stop goroutines/tasks securely, recursively.
+grunner - run/stop goroutines/tasks securely, recursively.
 
 ```go
-s1 := gstop.New()
+s1 := grunner.New()
 
 s1.Defer(func() {
     fmt.Println("s1 stopped 2")
