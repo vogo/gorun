@@ -1,4 +1,4 @@
-module github.com/vogo/gstop
+module github.com/vogo/grunner
 
 go 1.16
 

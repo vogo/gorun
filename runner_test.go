@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package gstop_test
+package grunner_test
 
 import (
 	"sync/atomic"
@@ -23,15 +23,15 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/vogo/gstop"
+	"github.com/vogo/grunner"
 )
 
 const goroutineScheduleInterval = time.Millisecond * 10
 
-func TestStopperStop(t *testing.T) {
+func TestRunnerStop(t *testing.T) {
 	t.Parallel()
 
-	s1 := gstop.New()
+	s1 := grunner.New()
 
 	s1.Defer(func() {
 		t.Log("s1 stopped 2")
@@ -76,10 +76,10 @@ func TestStopperStop(t *testing.T) {
 	time.Sleep(goroutineScheduleInterval)
 }
 
-func TestStopper(t *testing.T) {
+func TestRunner(t *testing.T) {
 	t.Parallel()
 
-	s := gstop.New()
+	s := grunner.New()
 
 	var (
 		status1 int64
@@ -108,18 +108,18 @@ func TestStopper(t *testing.T) {
 func TestNewChild(t *testing.T) {
 	t.Parallel()
 
-	s := gstop.New()
-	doTestParentChildStopper(t, s, s.NewChild())
+	s := grunner.New()
+	doTestParentChildRunner(t, s, s.NewChild())
 }
 
 func TestNewParent(t *testing.T) {
 	t.Parallel()
 
-	s := gstop.New()
-	doTestParentChildStopper(t, s.NewParent(), s)
+	s := grunner.New()
+	doTestParentChildRunner(t, s.NewParent(), s)
 }
 
-func doTestParentChildStopper(t *testing.T, parent, child *gstop.Stopper) {
+func doTestParentChildRunner(t *testing.T, parent, child *grunner.Runner) {
 	t.Helper()
 
 	var (
@@ -147,7 +147,7 @@ func TestNewChildFromChan(t *testing.T) {
 	t.Parallel()
 
 	c := make(chan struct{})
-	s := gstop.NewChild(c)
+	s := grunner.NewChild(c)
 
 	var status1 int64
 

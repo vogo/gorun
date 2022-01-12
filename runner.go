@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package gstop
+package grunner
 
 import (
 	"sync"
@@ -24,8 +24,8 @@ import (
 
 type Task func()
 
-// Stopper the stop status struct.
-type Stopper struct {
+// Runner the runner status struct.
+type Runner struct {
 	// channel to control stop status, stop it by calling Stop().
 	C chan struct{}
 
@@ -35,14 +35,14 @@ type Stopper struct {
 }
 
 // Defer add task called in desc order when stopper is stopped.
-func (s *Stopper) Defer(task Task) {
+func (s *Runner) Defer(task Task) {
 	s.doSlow(func() {
 		s.defers = append(s.defers, task)
 	})
 }
 
 // doStop do stop work, include closing the chan and calling all defers.
-func (s *Stopper) doStop() {
+func (s *Runner) doStop() {
 	defer atomic.StoreUint32(&s.done, 1)
 
 	close(s.C)
@@ -57,13 +57,13 @@ func (s *Stopper) doStop() {
 }
 
 // Stop close the stopper.
-func (s *Stopper) Stop() {
+func (s *Runner) Stop() {
 	s.doSlow(s.doStop)
 }
 
 // StopWith stop the stopper and execute the task.
 // the same as calling Defer(task) first, and then calling Stop().
-func (s *Stopper) StopWith(task Task) {
+func (s *Runner) StopWith(task Task) {
 	s.doSlow(func() {
 		s.defers = append(s.defers, task)
 		s.doStop()
@@ -72,7 +72,7 @@ func (s *Stopper) StopWith(task Task) {
 
 // doSlow do func synchronously if the stopper has not been stopped.
 // see sync.Once.
-func (s *Stopper) doSlow(f func()) {
+func (s *Runner) doSlow(f func()) {
 	if atomic.LoadUint32(&s.done) == 0 {
 		s.m.Lock()
 		defer s.m.Unlock()
@@ -85,7 +85,7 @@ func (s *Stopper) doSlow(f func()) {
 
 // Loop run task util the stopper is stopped.
 // Note, there is not an interval between the executions of two tasks.
-func (s *Stopper) Loop(task Task) {
+func (s *Runner) Loop(task Task) {
 	go func() {
 		for {
 			select {
@@ -98,17 +98,17 @@ func (s *Stopper) Loop(task Task) {
 	}()
 }
 
-// New create a new Stopper.
-func New() *Stopper {
-	return &Stopper{
+// New create a new Runner.
+func New() *Runner {
+	return &Runner{
 		m: sync.Mutex{},
 		C: make(chan struct{}),
 	}
 }
 
-// NewChild create a new Stopper as child of the exists chan, when which is closed the child will be stopped too.
-func NewChild(stop chan struct{}) *Stopper {
-	child := &Stopper{
+// NewChild create a new Runner as child of the exists chan, when which is closed the child will be stopped too.
+func NewChild(stop chan struct{}) *Runner {
+	child := &Runner{
 		m: sync.Mutex{},
 		C: make(chan struct{}),
 	}
@@ -124,14 +124,14 @@ func NewChild(stop chan struct{}) *Stopper {
 	return child
 }
 
-// NewChild create a new Stopper as child of the exists one, when which is stopped the child will be stopped too.
-func (s *Stopper) NewChild() *Stopper {
+// NewChild create a new Runner as child of the exists one, when which is stopped the child will be stopped too.
+func (s *Runner) NewChild() *Runner {
 	return NewChild(s.C)
 }
 
-// NewParent create a new Stopper as parent of the exists one, which will be stopped when the new parent stopped.
-func (s *Stopper) NewParent() *Stopper {
-	parent := &Stopper{
+// NewParent create a new Runner as parent of the exists one, which will be stopped when the new parent stopped.
+func (s *Runner) NewParent() *Runner {
+	parent := &Runner{
 		m: sync.Mutex{},
 		C: make(chan struct{}),
 	}
