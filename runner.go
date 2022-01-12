@@ -20,6 +20,7 @@ package grunner
 import (
 	"sync"
 	"sync/atomic"
+	"time"
 )
 
 type Task func()
@@ -92,6 +93,28 @@ func (s *Runner) Loop(task Task) {
 			case <-s.C:
 				return
 			default:
+				task()
+			}
+		}
+	}()
+}
+
+// Interval run task at intervals util the stopper is stopped.
+func (s *Runner) Interval(task Task, interval time.Duration) {
+	go func() {
+		// run immediately for first time.
+		select {
+		case <-s.C:
+			return
+		default:
+			task()
+		}
+
+		for {
+			select {
+			case <-s.C:
+				return
+			case <-time.After(interval):
 				task()
 			}
 		}

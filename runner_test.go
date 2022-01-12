@@ -40,11 +40,16 @@ func TestRunnerStop(t *testing.T) {
 		t.Log("s1 stopped 1")
 	})
 
-	// loop run task until s1 closed.
+	// run loop task until s1 closed.
 	s1.Loop(func() {
 		t.Log("s1 run loop task")
 		time.Sleep(time.Millisecond * 3)
 	})
+
+	// run interval task until s1 closed.
+	s1.Interval(func() {
+		t.Log("s1 run interval task")
+	}, time.Millisecond)
 
 	go func() {
 		ticker := time.NewTicker(time.Millisecond * 2)
@@ -72,6 +77,10 @@ func TestRunnerStop(t *testing.T) {
 	time.Sleep(goroutineScheduleInterval)
 
 	s1.Stop()
+
+	s1.Interval(func() {
+		t.Fatal("should not run interval task after s1 stopped")
+	}, time.Millisecond)
 
 	time.Sleep(goroutineScheduleInterval)
 }
