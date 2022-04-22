@@ -1,11 +1,11 @@
-grunner - run/stop goroutines/tasks securely, recursively.
+gorun - run/stop goroutines/tasks securely, recursively.
 
-[![codecov](https://codecov.io/gh/vogo/grunner/branch/master/graph/badge.svg)](https://codecov.io/gh/vogo/grunner)
-[![GoDoc](https://godoc.org/github.com/vogo/grunner?status.svg)](https://godoc.org/github.com/vogo/grunner)
+[![codecov](https://codecov.io/gh/vogo/gorun/branch/master/graph/badge.svg)](https://codecov.io/gh/vogo/gorun)
+[![GoDoc](https://godoc.org/github.com/vogo/gorun?status.svg)](https://godoc.org/github.com/vogo/gorun)
 ![license](https://img.shields.io/badge/license-Apache--2.0-green.svg)
 
 ```go
-s1 := grunner.New()
+s1 := gorun.New()
 
 s1.Defer(func() {
     fmt.Println("s1 stopped 2")
